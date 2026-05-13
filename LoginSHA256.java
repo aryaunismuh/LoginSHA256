@@ -1,90 +1,101 @@
 import java.util.HashMap;
 import java.util.Scanner;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class LoginSHA256 {
 
+    // Database sederhana
     static HashMap<String, String> database = new HashMap<>();
 
-    // Fungsi hash SHA-256 
+    // Fungsi untuk mengubah password menjadi hash SHA-256
     public static String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
 
             byte[] hash = md.digest(password.getBytes());
 
-            StringBuilder hasil = new StringBuilder();
+            StringBuilder hexString = new StringBuilder();
 
             for (byte b : hash) {
-                hasil.append(String.format("%02x", b));
+                String hex = Integer.toHexString(0xff & b);
+
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+
+                hexString.append(hex);
             }
 
-            return hasil.toString();
+            return hexString.toString();
 
-        } catch (Exception e) {
-            return null;
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    // Registrasi
+    // Fungsi registrasi
     public static void registrasi(Scanner input) {
-
         System.out.print("Masukkan Username : ");
         String username = input.nextLine();
 
         System.out.print("Masukkan Password : ");
         String password = input.nextLine();
 
-        String hash = hashPassword(password);
+        // Hash password
+        String hashedPassword = hashPassword(password);
 
-        database.put(username, hash);
+        // Simpan ke database
+        database.put(username, hashedPassword);
 
-        System.out.println("\nRegistrasi Berhasil");
-        System.out.println("Hash Password : " + hash);
+        System.out.println("\n=== Registrasi Berhasil ===");
+        System.out.println("Username       : " + username);
+        System.out.println("Hash Password  : " + hashedPassword);
     }
 
-    // Login
+    // Fungsi login
     public static void login(Scanner input) {
-
         System.out.print("Masukkan Username : ");
         String username = input.nextLine();
 
         System.out.print("Masukkan Password : ");
         String password = input.nextLine();
 
-        String hashLogin = hashPassword(password);
-
+        // Cek username
         if (database.containsKey(username)) {
 
-            if (database.get(username).equals(hashLogin)) {
-                System.out.println("Login Berhasil");
+            // Hash password input
+            String hashedInput = hashPassword(password);
+
+            // Verifikasi password
+            if (database.get(username).equals(hashedInput)) {
+                System.out.println("Status Login : BERHASIL");
             } else {
-                System.out.println("Password Salah");
+                System.out.println("Status Login : GAGAL - Password Salah");
             }
 
         } else {
-            System.out.println("Username Tidak Ditemukan");
+            System.out.println("Status Login : GAGAL - Username Tidak Ditemukan");
         }
     }
 
+    // Main Program
     public static void main(String[] args) {
 
         Scanner input = new Scanner(System.in);
-
-        int pilih;
+        int pilihan;
 
         do {
-
             System.out.println("\n===== MENU =====");
             System.out.println("1. Registrasi");
             System.out.println("2. Login");
             System.out.println("3. Keluar");
-            System.out.print("Pilih : ");
+            System.out.print("Pilih Menu : ");
 
-            pilih = input.nextInt();
+            pilihan = input.nextInt();
             input.nextLine();
 
-            switch (pilih) {
+            switch (pilihan) {
 
                 case 1:
                     registrasi(input);
@@ -99,10 +110,10 @@ public class LoginSHA256 {
                     break;
 
                 default:
-                    System.out.println("Pilihan Salah");
+                    System.out.println("Pilihan Tidak Valid");
             }
 
-        } while (pilih != 3);
+        } while (pilihan != 3);
 
         input.close();
     }
