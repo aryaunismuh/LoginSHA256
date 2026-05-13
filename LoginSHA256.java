@@ -6,7 +6,7 @@ public class LoginSHA256 {
 
     static HashMap<String, String> database = new HashMap<>();
 
-    // Fungsi hash SHA-256
+    // Fungsi hash SHA-256 
     public static String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
